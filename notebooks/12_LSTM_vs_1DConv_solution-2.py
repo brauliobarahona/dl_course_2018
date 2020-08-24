@@ -1,19 +1,19 @@
 # -------------------------------------------------------------------------------- #
 #   Given the solutions in the notebook 12_LSTM_vs_1DConv_solution.ipynb this script
-# presents some amendments. It is meant to be run from the ipython terminal, thus
-# load standard libraries, i.e. %pylab
+# uses tensorflow2
 # -------------------------------------------------------------------------------- #
 
 # ## Prediction of time series with different neural networks architectures
-# load required libraries:
-# (!) activate %pylab
 import os, sys
+import numpy as np
+from matplotlib import pyplot as plt
 import h5py
 
-import keras 
-from keras.models import load_model
-from keras.models import Sequential
-from keras.layers import Dense, Lambda, Convolution1D,LSTM, SimpleRNN
+import tensorflow as tf
+from tensorflow import keras 
+from tensorflow.keras.models import load_model
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Lambda, Convolution1D,LSTM, SimpleRNN
 
 # ------------------------------- functions -------------------------------------- # 
 def gen_data(size=1000, noise=0.1,seq_length=128,look_ahead=10):
@@ -173,12 +173,12 @@ model = model_1Dconv_w_d # select model
 model_name = '1D convolution with dilation rate'
 pred = model.predict(data)[0].reshape(-1,) #batch_size=32, steps=None *!?
 
-figure(num=None, figsize=(13,5))
-plot(iseq[:seq_length],data.reshape(-1,),color='blue', label='input')
-plot(iseq[seq_length:],pred,color='orange', label='prediction')
-title(model_name)
-legend()
-axvline(x=seq_length)
+plt.figure(num=None, figsize=(13,5))
+plt.plot(iseq[:seq_length],data.reshape(-1,),color='blue', label='input')
+plt.plot(iseq[seq_length:],pred,color='orange', label='prediction')
+plt.title(model_name)
+plt.legend()
+plt.axvline(x=seq_length)
 
 # In addition, we want to predict for longer than just 10 steps, we will  
 #just predict the next 10 steps and take the predictions as new "true" observations 
@@ -219,10 +219,10 @@ else:
 model_LSTM.summary()
 
 pred =  predict_steps(model_LSTM, data, steps)
-figure(num=None, figsize=(13,5))
-plot(iseq[:seq_length], data.reshape(-1,), color='blue')
-plot(range(seq_length, seq_length+len(pred)), pred, color='orange')
-axvline(x=seq_length)
+plt.figure(num=None, figsize=(13,5))
+plt.plot(iseq[:seq_length], data.reshape(-1,), color='blue')
+plt.plot(range(seq_length, seq_length+len(pred)), pred, color='orange')
+plt.axvline(x=seq_length)
 
 # ----------------------------- compare models ------------------------------------------ #
 models = [model_simple_RNN, model_1Dconv, model_1Dconv_w_d, model_LSTM]
@@ -230,3 +230,6 @@ mnames = ['RNN', '1Dconv', '1Dconv_w_d', 'LSTM']
 D ={}
 for m,n in zip(models, mnames):
   D[n] = predict_steps(m,data,steps)
+
+for i in D:
+  plt.plot(D[i], label=i)
